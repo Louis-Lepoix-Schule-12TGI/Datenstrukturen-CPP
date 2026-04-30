@@ -15,7 +15,7 @@ class Knoten{
     };
 
     //Destruktor
-    ~Knoten();
+    ~Knoten(){};
 
     //Schutz gegen simples Kopieren, um zukünftige Fehler verzubeugen
     Knoten(const Knoten&) = delete;
