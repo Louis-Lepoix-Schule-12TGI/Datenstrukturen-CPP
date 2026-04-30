@@ -10,8 +10,8 @@ template<typename Typ>
 class Knoten{
     public:
     //Konstruktor
-    Knoten(Typ pInhalt){
-        aInhalt = &pInhalt;
+    Knoten<Typ>(Typ pInhalt){
+        aInhalt = std::move(pInhalt);
     };
 
     //Destruktor
@@ -32,12 +32,12 @@ class Knoten{
     void setzeInhalt(Typ pInhalt){
         aInhalt = std::move(pInhalt);
     };
-    Typ gibInhalt(){
-        return *aInhalt;
+    Typ gibInhalt() const{
+        return aInhalt;
     };
 
     private:
     Typ aInhalt; //Daten, die in der Datenstruktur organisiert werden
     std::unique_ptr<Knoten<Typ>> aNaechster; // Folge-Knoten
 
-}
+};
