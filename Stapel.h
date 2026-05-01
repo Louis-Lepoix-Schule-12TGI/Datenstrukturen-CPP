@@ -32,7 +32,9 @@ class Stapel{
             throw std::out_of_range("Fehler: Der Stapel ist leer.");
         }
         Typ rueckgabe = aAnfang->gibInhalt();
-        aAnfang = std::move(aAnfang->gibNaechsten());
+
+        aAnfang = std::move(aAnfang->aNaechster);
+        
         return rueckgabe;
     }
 
@@ -40,8 +42,10 @@ class Stapel{
         if (istLeer()) {
             throw std::out_of_range("Fehler: Der Stapel ist leer.");
         }
+        // For 'top', we only read the data and do not modify ownership.
         return aAnfang->gibInhalt();
     }
     private:
     std::unique_ptr<Knoten<Typ>> aAnfang;
+    Knoten<Typ> tmpKnoten;
 };

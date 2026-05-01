@@ -10,6 +10,7 @@ template<typename Typ>
 class Knoten{
     public:
     //Konstruktor
+    Knoten<Typ>(){};
     Knoten<Typ>(Typ pInhalt){
         aInhalt = std::move(pInhalt);
     };
@@ -25,8 +26,8 @@ class Knoten{
     void setzeNaechsten(std::unique_ptr<Knoten<Typ>> pNaechster){
         aNaechster = std::move(pNaechster);
     };
-    Knoten<Typ> gibNaechsten(){
-        return *aNaechster;
+    std::unique_ptr<Knoten<Typ>> gibNaechsten(){
+        return aNaechster;
     };
 
     void setzeInhalt(Typ pInhalt){
@@ -36,8 +37,9 @@ class Knoten{
         return aInhalt;
     };
 
+    std::unique_ptr<Knoten<Typ>> aNaechster; // Folge-Knoten
     private:
     Typ aInhalt; //Daten, die in der Datenstruktur organisiert werden
-    std::unique_ptr<Knoten<Typ>> aNaechster; // Folge-Knoten
+
 
 };
