@@ -42,7 +42,6 @@ class Stapel{
         if (istLeer()) {
             throw std::out_of_range("Fehler: Der Stapel ist leer.");
         }
-        // For 'top', we only read the data and do not modify ownership.
         return aAnfang->gibInhalt();
     }
     private:
