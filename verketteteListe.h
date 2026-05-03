@@ -21,7 +21,6 @@ class verketteteListe{
         return aAnfang.get() == nullptr;
     }
 
-
     Typ entfernenVorne(){
         if (istLeer()) {
             throw std::logic_error("Fehler: Der Stapel ist leer. Es gibt nichts zum entfernen");
@@ -52,7 +51,7 @@ class verketteteListe{
         }
         Knoten<Typ> aktuellerKnoten = *aAnfang.get();
 
-        for(int i = 0; i <= pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gestz wurde 
+        for(int i = 0; i < pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gesetz wurde 
             
             //Falls der Index zu groß ist
             if(aktuellerKnoten.gibNaechsten().get() == nullptr && pIndex > i){
@@ -61,7 +60,7 @@ class verketteteListe{
                 std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
                                             static_cast<std::string>>(pIndex) + 
                                             " .  Hoehster Index:" +
-                                            static_cast<std::string>(anzahlElemente());
+                                            static_cast<std::string>(anzahlElemente()-1);
     
                     throw std::out_of_range(errorNachricht); //Error werfen
             }else{
@@ -72,6 +71,76 @@ class verketteteListe{
         return aktuellerKnoten.gibInhalt(); //gibt den Inhalt an der Stelle von pIndex zurück
     }
 
+    void ersetzen(int pIndex, Typ pInhalt){
+        if(pIndex < 0){
+            throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
+        }
+
+        if(istLeer())){
+            throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index existieren");
+        }
+        Knoten<Typ> aktuellerKnoten = *aAnfang.get();
+
+        for(int i = 0; i < pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gesetz wurde 
+            
+            //Falls der Index zu groß ist
+            if(aktuellerKnoten.gibNaechsten().get() == nullptr && pIndex > i){
+
+                //Error Nachricht schreiben
+                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
+                                            static_cast<std::string>>(pIndex) + 
+                                            " .  Hoehster Index:" +
+                                            static_cast<std::string>(anzahlElemente()-1);
+    
+                    throw std::out_of_range(errorNachricht); //Error werfen
+            }else{
+                aktuellerKnoten = *aktuellerKnoten.get() //aktuellen Knoten auf nächsten Knoten setzen
+            }
+        }
+        aktuellerKnoten.setzeInhalt(pInhalt);
+    };
+
+    void einfuegen(int pIndex, Typ pInhalt){
+        if(pIndex < 0){
+            throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
+        }
+
+        Knoten<Typ> aktuellerKnoten = *aAnfang.get();
+        
+        //ACHTUNG: For-loop andes als bei ersetzen() und inhalt()
+        for(int i = 0; i < (pIndex-1); i++){ //For-loop endet, wenn aktuellerKnoten auf den Vorgänger des Ziel-Knoten gesetz wurde (fängt bei 0 erst gar nicht an)
+            
+            //Falls der Index zu groß ist
+            if(aktuellerKnoten.gibNaechsten().get() == nullptr && pIndex > (i+1){ //Änderung von den Anderen: Index darf 1 größer sein falls ein Element angehangen wird
+
+                //Error Nachricht schreiben
+                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
+                                            static_cast<std::string>>(pIndex) + 
+                                            " .  Hoehster Index:" +
+                                            static_cast<std::string>(anzahlElemente()-1);
+    
+                    throw std::out_of_range(errorNachricht); //Error werfen
+            }else{
+                aktuellerKnoten = *aktuellerKnoten.get() //aktuellen Knoten auf nächsten Knoten setzen
+            }
+        }
+
+    };
+
+    void einfuegenVorne(Typ pInhalt){
+        if(pIndex < 0){
+            throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
+        }
+
+        einfuegen(0, pInhalt);
+    };
+
+    void anhaengen(Typ pInhalt){
+        einfuegen(anzahlElemente(); pInhalt);
+    }
+    
+
+    
     private:
     std::unique_ptr<Knoten<Typ>> aAnfang;
 };
