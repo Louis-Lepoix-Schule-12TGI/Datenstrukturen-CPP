@@ -10,8 +10,8 @@ template<typename Typ>
 class Knoten{
     public:
     //Konstruktor
-    Knoten<Typ>(){};
-    Knoten<Typ>(Typ pInhalt){
+    Knoten(){};
+    Knoten(Typ pInhalt){
         aInhalt = std::move(pInhalt);
     };
 
