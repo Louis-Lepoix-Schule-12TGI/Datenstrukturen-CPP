@@ -178,6 +178,26 @@ class verketteteListe{
         return rueckgabe;
     }
 
+    bool enthaelt(Typ pInhalt){
+        if (istLeer()) {
+            return false;
+        }
+        
+        std::unique_ptr<Knoten<Typ>> aktuellerZeiger = aAnfang;
+        Knoten<Typ> aktuellerKnoten = aktuellerZeiger->get();
+
+        while(aktuellerZeiger.get() != nullptr){
+            aktuellerZeiger = aktuellerKnoten.gibNaechsten();
+            aktuellerKnoten = aktuellerZeiger->get();
+            if(aktuellerKnoten.gibInhalt() == pInhalt){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
+
 
     
     private:
