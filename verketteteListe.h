@@ -196,6 +196,25 @@ class verketteteListe{
         return false;
     }
 
+    void entfernenElement(Typ pInhalt){
+        std::unique_ptr<Knoten<Typ>> aktuellerZeiger = aAnfang;
+        std::unique_ptr<Knoten<Typ>> voherigerZeiger;
+        Knoten<Typ> aktuellerKnoten = aktuellerZeiger->get();
+
+        int zielIndex;
+        int zaehler = 0;
+
+        while(aktuellerZeiger.get() != nullptr){
+            if(aktuellerZeiger->get().gibInhalt() == pInhalt){
+                voherigerZeiger->get().setzeNaechsten(aktuellerZeiger->get().gibNaechsten())
+            }
+            voherigerZeiger = aktuellerZeiger;
+            aktuellerZeiger = aktuellerZeiger->get().gibNaechsten();
+
+            zaehler++:
+        }
+    }
+
     
 
 
