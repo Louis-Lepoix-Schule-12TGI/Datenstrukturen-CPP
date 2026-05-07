@@ -5,8 +5,6 @@
 #include <utility>
 #pragma once //verhindert mehrfache inklusion
 
-//noch nicht fertig Link zum Klassendiagram: https://llsbad.sharepoint.com/:b:/s/TG_24_27/IQCMCj7fIKkhR6wBARU3raoLAQpBkhulJrSSbk4A_vLNU8o?e=yTXY9b Seite 2
-
 template<typename Typ>
 class verketteteListe{
     public:
@@ -16,6 +14,47 @@ class verketteteListe{
     //Sicherung mit Kopieregeln
     verketteteListe(const verketteteListe&) = delete;
     verketteteListe& operator=(const verketteteListe&) = delete;
+
+
+
+    void indexZuGrossTester(int pIndex, int i, std::unique_ptr<Knoten<Typ>> aktuellerKnoten){
+        if(aktuellerKnoten->get().gibNaechsten().get() == nullptr && pIndex > i){
+
+                //Error Nachricht schreiben
+                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
+                                            static_cast<std::string>>(pIndex) + 
+                                            " .  Hoehster Index:" +
+                                            static_cast<std::string>(anzahlElemente()-1);
+    
+                    throw std::out_of_range(errorNachricht); //Error werfen
+            }
+    }
+
+    std::unique_ptr<Knoten<Typ>> knotenWaehler(int pIndex){
+        ''' 
+        Tut einen Pointer, welcher zum Knoten an der Stelle pIndex zeigt, zurückgeben 
+        '''
+
+        if(istLeer())){
+            throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index ausgewaehlt werden");
+        }
+
+        std::unique_ptr<Knoten<Typ>> aktuellerKnoten = aAnfang;
+        std::unique_ptr<Knoten<Typ>> zielKnoten;
+
+        for(int i = 0; i < pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gesetz wurde 
+            
+            //Falls der Index zu groß ist
+            indexZuGrossTester(); // Aufruf NOCH ohne Parameter
+            aktuellerKnoten.setzeNaechsten(aktuellerKnoten.gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
+            }
+        }
+
+        zielKnoten = aktuellerKnoten;
+        
+        return zielKnoten;
+
+    }
 
     bool istLeer() const {
         return aAnfang.get() == nullptr;
@@ -131,7 +170,7 @@ class verketteteListe{
         einfuegen(anzahlElemente(); pInhalt);
     }
 
-    Typ entfernen(int pIndex){ //noch nicht fertig
+    Typ entfernen(int pIndex){
         if(pIndex < 0){
             throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
         }
@@ -214,10 +253,6 @@ class verketteteListe{
             zaehler++:
         }
     }
-
-    
-
-
     
     private:
     std::unique_ptr<Knoten<Typ>> aAnfang;
