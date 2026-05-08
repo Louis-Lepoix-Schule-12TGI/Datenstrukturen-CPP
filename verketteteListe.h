@@ -16,24 +16,22 @@ class verketteteListe{
     verketteteListe& operator=(const verketteteListe&) = delete;
 
 
-
-    void indexZuGrossTester(int pIndex, int i, std::unique_ptr<Knoten<Typ>> aktuellerKnoten){
-        if(aktuellerKnoten->get().gibNaechsten().get() == nullptr && pIndex > i){
-
-                //Error Nachricht schreiben
-                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
-                                            static_cast<std::string>>(pIndex) + 
-                                            " .  Hoehster Index:" +
-                                            static_cast<std::string>(anzahlElemente()-1);
-    
-                    throw std::out_of_range(errorNachricht); //Error werfen
-            }
+    void indexZuGrossTester(int pIndex, int& i, std::unique_ptr<Knoten<Typ>>& aktuellerKnoten){
+    if(aktuellerKnoten->get().gibNaechsten() == nullptr && pIndex > i){
+        //Error werfen - wir sind am Ende und haben den Index noch nicht erreicht
+        std::string errorNachricht = "Fehler: Der Index ist zu groß. Gegebenen Index: " + 
+                                      std::to_string(pIndex) + ". Höchster Index: " + 
+                                      std::to_string(i);
+        throw std::out_of_range(errorNachricht);
     }
+}
+
+
 
     std::unique_ptr<Knoten<Typ>> knotenWaehler(int pIndex){
-        ''' 
+        /*
         Tut einen Pointer, welcher zum Knoten an der Stelle pIndex zeigt, zurückgeben 
-        '''
+        */
 
         if(istLeer())){
             throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index ausgewaehlt werden");
@@ -45,8 +43,8 @@ class verketteteListe{
         for(int i = 0; i < pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gesetz wurde 
             
             //Falls der Index zu groß ist
-            indexZuGrossTester(); // Aufruf NOCH ohne Parameter
-            aktuellerKnoten.setzeNaechsten(aktuellerKnoten.gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
+            indexZuGrossTester(pIndex, i, aktuellerKnoten); 
+            aktuellerKnoten->get().setzeNaechsten(aktuellerKnoten->get().gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
             }
         }
 
@@ -80,26 +78,9 @@ class verketteteListe{
         if(istLeer())){
             throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index existieren");
         }
-        Knoten<Typ> aktuellerKnoten = aAnfang->get();
+        std::unique_ptr<Knoten<Typ>> aktuellerKnoten = knotenWaehler(pIndex);
 
-        for(int i = 0; i < pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gesetz wurde 
-            
-            //Falls der Index zu groß ist
-            if(aktuellerKnoten.gibNaechsten().get() == nullptr && pIndex > i){
-
-                //Error Nachricht schreiben
-                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
-                                            static_cast<std::string>>(pIndex) + 
-                                            " .  Hoehster Index:" +
-                                            static_cast<std::string>(anzahlElemente()-1);
-    
-                    throw std::out_of_range(errorNachricht); //Error werfen
-            }else{
-                aktuellerKnoten.setzeNaechsten(aktuellerKnoten.gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
-            }
-        }
-
-        return aktuellerKnoten.gibInhalt(); //gibt den Inhalt an der Stelle von pIndex zurück
+        return aktuellerKnoten->get().gibInhalt(); //gibt den Inhalt an der Stelle von pIndex zurück
     }
 
     void ersetzen(int pIndex, Typ pInhalt){
@@ -110,59 +91,38 @@ class verketteteListe{
         if(istLeer())){
             throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index existieren");
         }
-        Knoten<Typ> aktuellerKnoten = aAnfang->get();
-
-        for(int i = 0; i < pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gesetz wurde 
-            
-            //Falls der Index zu groß ist
-            if(aktuellerKnoten.gibNaechsten().get() == nullptr && pIndex > i){
-
-                //Error Nachricht schreiben
-                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
-                                            static_cast<std::string>>(pIndex) + 
-                                            " .  Hoehster Index:" +
-                                            static_cast<std::string>(anzahlElemente()-1);
-    
-                    throw std::out_of_range(errorNachricht); //Error werfen
-            }else{
-                aktuellerKnoten.setzeNaechsten(aktuellerKnoten.gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
-            }
-        }
-        aktuellerKnoten.setzeInhalt(pInhalt);
+        std::unique_ptr<Knoten<Typ>> derKnoten = knotenWaehler(pIndex);
+        derKnoten->get().setzeInhalt(pInhalt);
     };
 
     void einfuegen(int pIndex, Typ pInhalt){
         if(pIndex < 0){
             throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
+        }else if(pIndex == 0){
+            aAnfang = std::move(zeigerZuNeuemKnoten);
+            return;
         }
 
-        Knoten<Typ> aktuellerKnoten = aAnfang->get();
+        if(pIndex > anzahlElemente()){
+            throw std::invalid_argument("Fehler: Der Index ist zu gross.");
+        }
+
+        auto zeigerZuNeuemKnoten = std::make_unique<Knoten<Typ>>(pInhalt);        
+
+        std::unique_ptr<Knoten<Typ>> voherigerKnoten = knotenWaehler(pIndex-1);
+        voherigerKnoten->get().setzeNaechsten(zeigerZuNeuemKnoten);
+
+
+        if(pIndex < anzahlElemente()){
+            std::unique_ptr<Knoten<Typ>> nachfolgenderKnoten = knotenWaehler(pIndex);
+            neuerKnoten.setzeNaechsten(nachfolgenderKnoten);
+        }else if(pIndex == anzahlElemente()){
+            voherigerKnoten->get().setzeNaechsten(zeigerZuNeuemKnoten);
+        }
         
-        //ACHTUNG: For-loop anders als bei ersetzen() und inhalt()
-        for(int i = 0; i < (pIndex-1); i++){ //For-loop endet, wenn aktuellerKnoten auf den Vorgänger des Ziel-Knoten gesetz wurde (fängt bei 0 erst gar nicht an)
-            
-            //Falls der Index zu groß ist
-            if(aktuellerKnoten.gibNaechsten().get() == nullptr && pIndex > (i+1){ //Änderung von den Anderen: Index darf 1 größer sein falls ein Element angehangen wird
-
-                //Error Nachricht schreiben
-                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
-                                            static_cast<std::string>>(pIndex) + 
-                                            " .  Hoehster Index:" +
-                                            static_cast<std::string>(anzahlElemente()-1);
-    
-                    throw std::out_of_range(errorNachricht); //Error werfen
-            }else{
-                aktuellerKnoten.setzeNaechsten(aktuellerKnoten.gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
-            }
-        }
-
     };
 
     void einfuegenVorne(Typ pInhalt){
-        if(pIndex < 0){
-            throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
-        }
-
         einfuegen(0, pInhalt);
     };
 
@@ -175,35 +135,28 @@ class verketteteListe{
             throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
         }
 
-        Knoten<Typ> aktuellerKnoten = aAnfang->get();
-        
-        //ACHTUNG: For-loop anders als bei ersetzen(), einfügen() und inhalt()
-        for(int i = 0; i < (pIndex-1); i++){ //For-loop endet, wenn aktuellerKnoten auf den Vorgänger des Ziel-Knoten gesetz wurde (fängt bei 0 erst gar nicht an)
-            
-            //Falls der Index zu groß ist
-            if(aktuellerKnoten.gibNaechsten().get() == nullptr && pIndex > (i){
-                //Error Nachricht schreiben
-                std::string errorNachricht = "Fehler: Es exestiert kein Elemnt beim gegebenen Index: " + 
-                                            static_cast<std::string>>(pIndex) + 
-                                            " .  Hoehster Index:" +
-                                            static_cast<std::string>(anzahlElemente()-1);
-    
-                    throw std::out_of_range(errorNachricht); //Error werfen
-            }else{
-                aktuellerKnoten.setzeNaechsten(aktuellerKnoten.gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
-            }
+        if(pIndex >= anzahlElemente()){
+            throw std::invalid_argument("Fehler: Der Index ist zu gross.")
         }
 
-        Knoten<Typ> rueckgabeKnoten = aktuellerKnoten.gibNaechsten()->get();
+        if(pIndex == 0){ //edgecase
+            Typ tmpInhalt = aAnfang->get().gibInhalt();
+            aAnfang = std::move(aAnfang->get().gibNaechsten());
+            return tmpInhalt;
+        }
 
-        if(rueckgabeKnoten.get() != nullptr){ // Falls ein Nachfolger existiert
-            aktuellerKnoten.setzeNaechsten(rueckgabeKnoten.gibNaechsten()); //setze aktuellerKnoten.aNaechster auf rueckgabeKnoten.aNaechster
+        std::unique_ptr voherigerKnoten = knotenWaehler(pIndex-1);
+        std::unique_ptr rueckgabeKnoten = knotenWaehler(pIndex);
+
+        //Zeiger "aNaechster" vom voherigen Knoten vom Rückgabe-Knoten entfernen
+        if(rueckgabeKnoten->get().gibNaechsten() != nullptr){
+            std::unique_ptr folgeKnoten = knotenWaehler(pIndex+1);
+            voherigerKnoten->get().setzeNaechsten(folgeKnoten);
         }else{
-            std::unique_ptr<Knoten<Typ>> tmpZeiger = nullptr;
-            aktuellerKnoten.setzeNaechsten(tmpZeiger);
+            voherigerKnoten->get().setzeNaechsten(nullptr);
         }
 
-        return rueckgabeKnoten.gibInhalt();
+        return rueckgabeKnoten;
     };
 
     Typ entfernenVorne(){
@@ -238,9 +191,7 @@ class verketteteListe{
     void entfernenElement(Typ pInhalt){
         std::unique_ptr<Knoten<Typ>> aktuellerZeiger = aAnfang;
         std::unique_ptr<Knoten<Typ>> voherigerZeiger;
-        Knoten<Typ> aktuellerKnoten = aktuellerZeiger->get();
 
-        int zielIndex;
         int zaehler = 0;
 
         while(aktuellerZeiger.get() != nullptr){
@@ -250,7 +201,7 @@ class verketteteListe{
             voherigerZeiger = aktuellerZeiger;
             aktuellerZeiger = aktuellerZeiger->get().gibNaechsten();
 
-            zaehler++:
+            zaehler++;
         }
     }
     
