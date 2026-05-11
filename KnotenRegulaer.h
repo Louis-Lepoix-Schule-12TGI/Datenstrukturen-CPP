@@ -10,8 +10,8 @@ template<typename Typ>
 class Knoten{
     public:
     //Konstruktor
-    Knoten(){};
-    Knoten(Typ pInhalt){
+    Knoten() : aNaechster(nullptr){};
+    Knoten(Typ pInhalt) : aNaechster(nullptr) {
         aInhalt = std::move(pInhalt);
     };
 
@@ -23,10 +23,10 @@ class Knoten{
     Knoten& operator=(const Knoten&) = delete;
 
     // set und get Methoden:
-    void setzeNaechsten(std::unique_ptr<Knoten<Typ>> pNaechster){
-        aNaechster = std::move(pNaechster);
+    void setzeNaechsten(std::shared_ptr<Knoten<Typ>> pNaechster){
+        aNaechster = pNaechster;
     };
-    std::unique_ptr<Knoten<Typ>> gibNaechsten(){
+    std::shared_ptr<Knoten<Typ>> gibNaechsten(){
         return aNaechster;
     };
 
@@ -37,7 +37,7 @@ class Knoten{
         return aInhalt;
     };
 
-    std::unique_ptr<Knoten<Typ>> aNaechster; // Folge-Knoten
+    std::shared_ptr<Knoten<Typ>> aNaechster; // Folge-Knoten
     private:
     Typ aInhalt; //Daten, die in der Datenstruktur organisiert werden
 

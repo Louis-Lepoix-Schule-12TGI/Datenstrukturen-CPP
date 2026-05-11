@@ -8,7 +8,7 @@
 template<typename Typ>
 class verketteteListe{
     public:
-    verketteteListe() = default;
+    verketteteListe() : aAnfang(nullptr) {};
     ~verketteteListe() = default;
 
     //Sicherung mit Kopieregeln
@@ -16,8 +16,8 @@ class verketteteListe{
     verketteteListe& operator=(const verketteteListe&) = delete;
 
 
-    void indexZuGrossTester(int pIndex, int& i, std::unique_ptr<Knoten<Typ>>& aktuellerKnoten){
-    if(aktuellerKnoten.gibNaechsten() == nullptr && pIndex > i){
+    void indexZuGrossTester(int pIndex, int& i, std::shared_ptr<Knoten<Typ>>& aktuellerKnoten){
+    if(aktuellerKnoten->get().gibNaechsten() == nullptr && pIndex > i){
         //Error werfen - wir sind am Ende und haben den Index noch nicht erreicht
         std::string errorNachricht = "Fehler: Der Index ist zu groß. Gegebenen Index: " + 
                                       std::to_string(pIndex) + ". Höchster Index: " + 
@@ -28,7 +28,7 @@ class verketteteListe{
 
 
 
-    std::unique_ptr<Knoten<Typ>> knotenWaehler(int pIndex){
+    std::shared_ptr<Knoten<Typ>> knotenWaehler(int pIndex){
         /*
         Tut einen Pointer, welcher zum Knoten an der Stelle pIndex zeigt, zurückgeben 
         */
@@ -37,39 +37,39 @@ class verketteteListe{
             throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index ausgewaehlt werden");
         }
 
-        std::unique_ptr<Knoten<Typ>> aktuellerKnoten = std::move(aAnfang);
-        std::unique_ptr<Knoten<Typ>> zielKnoten = nullptr;
+        std::shared_ptr<Knoten<Typ>> aktuellerKnoten = aAnfang;
 
         for(int i = 0; i < pIndex; i++){ //For-loop endet, wenn aktuellerKnoten auf den Ziel-Knoten gesetz wurde 
             
             //Falls der Index zu groß ist
             indexZuGrossTester(pIndex, i, aktuellerKnoten); 
-            aktuellerKnoten.setzeNaechsten(aktuellerKnoten.gibNaechsten()); //aktuellen Knoten auf nächsten Knoten setzen
+
+            aktuellerKnoten = aktuellerKnoten->get().gibNaechsten(); //aktuellen Knoten auf nächsten Knoten setzen
         
         }
         
-
-        zielKnoten = aktuellerKnoten;
-        
-        return zielKnoten;
+        return aktuellerKnoten;
 
     }
 
     bool istLeer() const {
-        return aAnfang.get() == nullptr;
+        return aAnfang == nullptr;
     }
 
     int anzahlElemente(){
-        int anzahl = 0;
-        std::unique_ptr<Knoten<Typ>> aktuellerZeiger = std::move(aAnfang);
-        while(aktuellerZeiger->gibNaechsten() != nullptr){
-            aktuellerZeiger = aktuellerZeiger->gibNaechsten();
+        if(istLeer()) return 0;
+    
+        int anzahl = 1;  // Start bei 1 (weil wir aAnfang nicht zählen)
+        std::shared_ptr<Knoten<Typ>> aktuellerZeiger = aAnfang->get();
+    
+        while(aktuellerZeiger->get().gibNaechsten() != nullptr){
+            aktuellerZeiger = aktuellerZeiger->get().gibNaechsten();
             anzahl++;
         }
         return anzahl;
     }
 
-    Typ inhalt(int pIndex) const{
+    Typ inhalt(int pIndex) {
         if(pIndex < 0){
             throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
         }
@@ -77,30 +77,31 @@ class verketteteListe{
         if(istLeer()){
             throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index existieren");
         }
-        std::unique_ptr<Knoten<Typ>> aktuellerKnoten = std::move(knotenWaehler(pIndex));
+        std::shared_ptr<Knoten<Typ>> aktuellerKnoten = knotenWaehler(pIndex);
+        
+        return aktuellerKnoten->get().gibInhalt(); //gibt den Inhalt an der Stelle von pIndex zurück
 
-        return aktuellerKnoten->gibInhalt(); //gibt den Inhalt an der Stelle von pIndex zurück
     }
 
     void ersetzen(int pIndex, Typ pInhalt){
-        if(pIndex < 0){
+        if(pIndex < 0){ 
             throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
         }
 
         if(istLeer()){
             throw std::logic_error("Fehler: Der Stapel ist leer. Es kann Nichts am Index existieren");
         }
-        std::unique_ptr<Knoten<Typ>> derKnoten = std::move(knotenWaehler(pIndex));
-        derKnoten->setzeInhalt(pInhalt);
+        std::shared_ptr<Knoten<Typ>> derKnoten = knotenWaehler(pIndex);
+        derKnoten->get().setzeInhalt(pInhalt);
     };
 
     void einfuegen(int pIndex, Typ pInhalt){
-        auto zeigerZuNeuemKnoten = std::make_unique<Knoten<Typ>>(pInhalt); 
+        std::shared_ptr zeigerZuNeuemKnoten = std::make_shared<Knoten<Typ>>(pInhalt); 
 
         if(pIndex < 0){
             throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
         }else if(pIndex == 0){
-            aAnfang = std::move(zeigerZuNeuemKnoten);
+            aAnfang = zeigerZuNeuemKnoten;
             return;
         }
 
@@ -109,15 +110,15 @@ class verketteteListe{
         }
        
 
-        std::unique_ptr<Knoten<Typ>> voherigerKnoten = std::move(knotenWaehler(pIndex-1));
-        voherigerKnoten->setzeNaechsten(zeigerZuNeuemKnoten);
+        std::shared_ptr<Knoten<Typ>> voherigerKnoten = knotenWaehler(pIndex-1);
+        voherigerKnoten->get().setzeNaechsten(std::move(zeigerZuNeuemKnoten));
 
 
         if(pIndex < anzahlElemente()){
-            std::unique_ptr<Knoten<Typ>> nachfolgenderKnoten = std::move(knotenWaehler(pIndex));
-            zeigerZuNeuemKnoten->setzeNaechsten(nachfolgenderKnoten);
+            std::shared_ptr<Knoten<Typ>> nachfolgenderKnoten = knotenWaehler(pIndex);
+            zeigerZuNeuemKnoten->get().setzeNaechsten(nachfolgenderKnoten);
         }else if(pIndex == anzahlElemente()){
-            voherigerKnoten->setzeNaechsten(zeigerZuNeuemKnoten);
+            voherigerKnoten->get().setzeNaechsten(zeigerZuNeuemKnoten);
         }
         
     };
@@ -131,43 +132,50 @@ class verketteteListe{
     }
 
     Typ entfernen(int pIndex){
-        if(pIndex < 0){
-            throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
-        }
-
         if(pIndex >= anzahlElemente()){
             throw std::invalid_argument("Fehler: Der Index ist zu gross.");
         }
 
-        if(pIndex == 0){ //edgecase
-            Typ tmpInhalt = aAnfang.gibInhalt();
-            aAnfang = std::move(aAnfang.gibNaechsten());
+        // Edge Case: Erstes Element
+        if(pIndex == 0) { 
+            Typ tmpInhalt = aAnfang->get().gibInhalt();
+            auto nachfolgerKnoten = aAnfang->get().gibNaechsten();
+            aAnfang = std::move(nachfolgerKnoten);
             return tmpInhalt;
         }
 
-        std::unique_ptr voherigerKnoten = std::move(knotenWaehler(pIndex-1));
-        std::unique_ptr rueckgabeKnoten = std::move(knotenWaehler(pIndex));
-
-        //Zeiger "aNaechster" vom voherigen Knoten vom Rückgabe-Knoten entfernen
-        if(rueckgabeKnoten.gibNaechsten() != nullptr){
-            std::unique_ptr folgeKnoten = std::move(knotenWaehler(pIndex+1));
-            voherigerKnoten.setzeNaechsten(folgeKnoten);
-        }else{
-            voherigerKnoten.setzeNaechsten(nullptr);
+        // Edge Case: Letztes Element
+        if(pIndex + 1 >= anzahlElemente()){
+            auto voherigerKnoten = knotenWaehler(pIndex-1);
+            Typ tmpInhalt = voherigerKnoten->get().gibNaechsten();
+            voherigerKnoten->get().setzeNaechsten(nullptr);
+            return tmpInhalt;
         }
 
-        return rueckgabeKnoten;
-    };
+        // Normaler Fall: Mittleres Element
+        auto voherigerKnoten = knotenWaehler(pIndex-1);
+        auto rueckgabeKnoten = voherigerKnoten->get().gibNaechsten();
+    
+        if(rueckgabeKnoten->get().gibNaechsten() != nullptr){
+            Typ folgeInhalt = voherigerKnoten->get().gibNaechsten();
+            voherigerKnoten->get().setzeNaechsten(folgeInhalt);
+        }else{
+            voherigerKnoten->get().setzeNaechsten(nullptr);
+        }
+
+        return rueckgabeKnoten->get().gibInhalt();  // Inhalt zurückgeben
+    }
 
     Typ entfernenVorne(){
         if (istLeer()) {
             throw std::logic_error("Fehler: Der Stapel ist leer. Es gibt nichts zum entfernen");
         }
-        Typ rueckgabe = aAnfang->gibInhalt();
 
-        aAnfang = std::move(aAnfang->aNaechster);
-        
-        return rueckgabe;
+        Typ tmpInhalt = aAnfang->get().gibInhalt(); //Inhalt speichern
+
+        aAnfang = aAnfang->get().gibNaechsten();  // aAnfang auf Nachfolger setzen
+
+        return tmpInhalt;
     }
 
     bool enthaelt(Typ pInhalt){
@@ -175,36 +183,36 @@ class verketteteListe{
             return false;
         }
         
-        std::unique_ptr<Knoten<Typ>> aktuellerZeiger = std::move(aAnfang);
-        Knoten<Typ> aktuellerKnoten = aktuellerZeiger;
+        std::shared_ptr<Knoten<Typ>> aktuellerZeiger = aAnfang;
 
-        while(aktuellerZeiger.get() != nullptr){
-            aktuellerZeiger = aktuellerKnoten.gibNaechsten();
-            aktuellerKnoten = aktuellerZeiger;
-            if(aktuellerKnoten.gibInhalt() == pInhalt){
+        while(aktuellerZeiger){
+            if(aktuellerZeiger->get().gibInhalt() == pInhalt){
                 return true;
             }
+            aktuellerZeiger = aktuellerZeiger->get().gibNaechsten();
         }
         return false;
     }
 
     void entfernenElement(Typ pInhalt){
-        std::unique_ptr<Knoten<Typ>> aktuellerZeiger = std::move(aAnfang);
-        std::unique_ptr<Knoten<Typ>> voherigerZeiger;
+        auto aktuellerZeiger = aAnfang;
+        std::shared_ptr<Knoten<Typ>> voherigerZeiger  = nullptr;
 
-        int zaehler = 0;
-
-        while(aktuellerZeiger.get() != nullptr){
-            if(aktuellerZeiger.gibInhalt() == pInhalt){
-                voherigerZeiger.setzeNaechsten(aktuellerZeiger.gibNaechsten());
+        while(aktuellerZeiger) {  // Schleife endet wenn die ganze verkettete liste durchlaufen wurde
+            if(aktuellerZeiger->get().gibInhalt() == pInhalt){
+                std::shared_ptr<Knoten<Typ>> naechsterKnoten = aktuellerZeiger->get().gibNaechsten();
+            
+                if (voherigerZeiger) {
+                    voherigerZeiger->get().setzeNaechsten(naechsterKnoten);
+                } else {
+                    aAnfang = naechsterKnoten;  // Edge Case: Erstes Element
+                }
             }
-            voherigerZeiger = std::move(aktuellerZeiger);
-            aktuellerZeiger = aktuellerZeiger.gibNaechsten();
-
-            zaehler++;
+            voherigerZeiger = aktuellerZeiger;
+            aktuellerZeiger = aktuellerZeiger->get().gibNaechsten(); 
         }
     }
     
     private:
-    std::unique_ptr<Knoten<Typ>> aAnfang;
+    std::shared_ptr<Knoten<Typ>> aAnfang;
 };
