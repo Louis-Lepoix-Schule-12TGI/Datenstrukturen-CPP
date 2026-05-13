@@ -24,11 +24,11 @@ class Stapel{
         
         if(aAnfang){ // Wenn Stapel nicht leer
             
-            neuerKnoten->setzeNaechsten(aAnfang);
+            neuerKnoten->get().setzeNaechsten(aAnfang); // bisherigen Anfang als Nachfolger des neuem Knoten setzen
             
-            aAnfang = neuerKnoten;  // Bestehenden Stack zum neuen Knoten hinzufügen
-        } else {    // First Element
-            aAnfang = neuerKnoten;  // Shared_ptr übernehmen
+            aAnfang = neuerKnoten;  // neuen Knoten als Anfang setzen
+        } else {    // erstes Element
+            aAnfang = neuerKnoten;  // neuen Knoten als Anfang setzen
         }
     }
 
@@ -37,24 +37,24 @@ class Stapel{
             throw std::out_of_range("Fehler: Der Stapel ist leer.");
         }
         
-        auto aktuellerKnoten = aAnfang;  // shared_ptr kopieren (nicht move!)
+        auto aktuellerKnoten = aAnfang;  // shared_ptr kopieren
         
-        // Wenn der Stack mehr als 1 Element hat, Bewahre den Nachfolger als neuen aAnfang!
-        if(aktuellerKnoten->gibNaechsten() != nullptr){
+        // Wenn der Stack mehr als 1 Element hat, den Nachfolger zum neuen Anfang setzen
+        if(aktuellerKnoten->get().gibNaechsten() != nullptr){
             auto nachfolgerKnoten = aktuellerKnoten->gibNaechsten();
             aAnfang = nachfolgerKnoten;  // Setze Nachfolger als neuen Top
         } else {
-            aAnfang = nullptr;  // War nur das einzige Element, jetzt ist der Stack leer!
+            aAnfang = nullptr;  // War nur das einzige Element, jetzt ist der Stack leer
         }
         
-        return aktuellerKnoten->gibInhalt();  // Wert aus aktuellem Knoten holen!
+        return aktuellerKnoten->get().gibInhalt();  // Wert des aktuellem Knoten zurückgeben
     }
 
     Typ top() const {
         if (istLeer()) {
             throw std::out_of_range("Fehler: Der Stapel ist leer.");
         }
-        return aAnfang->gibInhalt();
+        return aAnfang->get().gibInhalt();
     }
     
     private:
