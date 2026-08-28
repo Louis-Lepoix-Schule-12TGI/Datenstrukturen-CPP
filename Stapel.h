@@ -24,7 +24,7 @@ class Stapel{
         
         if(aAnfang){ // Wenn Stapel nicht leer
             
-            neuerKnoten->get().setzeNaechsten(aAnfang); // bisherigen Anfang als Nachfolger des neuem Knoten setzen
+            neuerKnoten->setzeNaechsten(aAnfang);
             
             aAnfang = neuerKnoten;  // neuen Knoten als Anfang setzen
         } else {    // erstes Element
@@ -40,21 +40,21 @@ class Stapel{
         auto aktuellerKnoten = aAnfang;  // shared_ptr kopieren
         
         // Wenn der Stack mehr als 1 Element hat, den Nachfolger zum neuen Anfang setzen
-        if(aktuellerKnoten->get().gibNaechsten() != nullptr){
+        if(aktuellerKnoten->gibNaechsten() != nullptr){
             auto nachfolgerKnoten = aktuellerKnoten->gibNaechsten();
             aAnfang = nachfolgerKnoten;  // Setze Nachfolger als neuen Top
         } else {
             aAnfang = nullptr;  // War nur das einzige Element, jetzt ist der Stack leer
         }
         
-        return aktuellerKnoten->get().gibInhalt();  // Wert des aktuellem Knoten zurückgeben
+        return aktuellerKnoten->gibInhalt();
     }
 
     Typ top() const {
         if (istLeer()) {
             throw std::out_of_range("Fehler: Der Stapel ist leer.");
         }
-        return aAnfang->get().gibInhalt();
+        return aAnfang->gibInhalt();
     }
     
     private:

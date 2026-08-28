@@ -2,7 +2,7 @@
 
 In diesem Repo werden alle Datenstrukturen, die wir im Unterricht behandelt haben, in C++ umgesetzt. Da wir diese im Unterricht nur als Pseudocode behandeln, wird dies eine gute Übung sein.
 
-> **Hinweis:** KI-generierte Umsetzungen bitte im Datei-Namen angeben (z.B. `_KI_generiert` oder `_KI_Generiert` als Suffix)!
+> **Hinweis:** Ein großer Teil der Implementierung und Tests wurde mit KI-Unterstützung erstellt und überarbeitet.
 
 ---
 
@@ -13,10 +13,10 @@ In diesem Repo werden alle Datenstrukturen, die wir im Unterricht behandelt habe
   - [KnotenRegulaer.h](#knotenregulaerh)
   - [Stapel.h](#stapelh)
   - [verketteteListe.h](#verkettetelisteh)
-  - [warteschlange.h](#warteschlangeH)
+  - [warteschlange.h](#warteschlangeh)
   - [testVerketteteListe.cpp](#testverkettetelistecpp)
-  - [stapel_test_KI_generiert.cpp](#stapel_test_ki_generiertcpp)
-  - [testStapel_KI_Generiert.cpp](#teststapel_ki_generiertcpp)
+  - [stapel_test_v1.cpp](#stapel_test_v1cpp)
+  - [testStapel_v2.cpp](#teststapel_v2cpp)
 - [Kompilieren & Ausführen](#kompilieren--ausführen)
 - [Konventionen](#konventionen)
 
@@ -24,7 +24,7 @@ In diesem Repo werden alle Datenstrukturen, die wir im Unterricht behandelt habe
 
 ## Projektübersicht
 
-Dieses Projekt ist eine Schulübung der Klasse 12TGI. Ziel ist es, die im Unterricht als Pseudocode vorgestellten klassischen Datenstrukturen in echtem C++-Code umzusetzen. Alle Implementierungen sind als **Header-Only-Bibliotheken** (`.h`) ausgeführt und nutzen moderne C++-Features wie Templates, Smart Pointer (`std::shared_ptr`) und Move-Semantik.
+Dieses Projekt ist eine Schulübung der Klasse 12TGI. Ziel ist es, die im Unterricht als Pseudocode vorgestellten klassischen Datenstrukturen in echtem C++-Code umzusetzen. Ein großer Teil des Codes wurde mit KI-Unterstützung erstellt und anschließend manuell korrigiert und getestet. Alle Implementierungen sind als **Header-Only-Bibliotheken** (`.h`) ausgeführt und nutzen moderne C++-Features wie Templates, Smart Pointer (`std::shared_ptr`) und Move-Semantik.
 
 Folgende Datenstrukturen sind aktuell enthalten:
 
@@ -99,7 +99,7 @@ Ungültige Indexzugriffe werden mit `std::out_of_range` bzw. `std::invalid_argum
 
 Implementiert eine generische **Warteschlange** (Queue) nach dem **FIFO-Prinzip** (First In, First Out). Diese Datei enthält eine eigene lokale `Knoten`-Klasse (mit rohen Zeigern statt Smart Pointern) sowie die eigentliche Klasse `Warteschlange<Typ>`.
 
-Die Warteschlange verwaltet intern zwei Zeiger: `kopf` (vorne) und `ende` (hinten).
+Die Warteschlange verwaltet intern zwei Zeiger: `kopf` (vorne) und `ende` (hinten). Der Destruktor löscht alle verbleibenden Knoten korrekt.
 
 Wichtige Methoden:
 
@@ -107,10 +107,8 @@ Wichtige Methoden:
 |--------------------|---------------------------------------------------------------------------|
 | `enqueue(inhalt)`  | Fügt ein neues Element am Ende der Warteschlange ein.                     |
 | `dequeue()`        | Entfernt das vorderste Element und gibt seinen Inhalt zurück.             |
-| `istLeer()`        | Gibt `true` zurück, wenn die Warteschlange leer ist (prüft, ob `kopf == NULL`). |
-| `anzahlElemente()` | Gibt die Anzahl der Elemente zurück (aktuell als Stub mit Rückgabe `0` implementiert). |
-
-> **Hinweis:** Diese Implementierung verwendet noch rohe Zeiger (kein `shared_ptr`) und ruft keinen Destruktor auf – hier besteht Verbesserungspotenzial hinsichtlich Speicherverwaltung.
+| `istLeer()`        | Gibt `true` zurück, wenn die Warteschlange leer ist (prüft `kopf`).       |
+| `anzahlElemente()` | Gibt die aktuelle Anzahl der Elemente zurück.                             |
 
 ---
 
@@ -127,9 +125,9 @@ Dieses File dient primär als schneller Rauchtest ("Smoke Test") der Implementie
 
 ---
 
-### `stapel_test_KI_generiert.cpp`
+### `stapel_test_v1.cpp`
 
-**KI-generiertes** Testprogramm für `Stapel.h` (Version 1). Es enthält eine Template-Hilfsfunktion `run_test<T>`, die den Stapel mit zwei verschiedenen Typen (`std::string` und `int`) vollständig testet:
+Testprogramm für `Stapel.h` (Version 1). Es enthält eine Template-Hilfsfunktion `run_test<T>`, die den Stapel mit zwei verschiedenen Typen (`std::string` und `int`) vollständig testet:
 
 1. Überprüfung des Anfangszustands (Stapel muss leer sein).
 2. Push mehrerer Elemente.
@@ -143,9 +141,9 @@ Jeder Test gibt `[PASS]` oder `[FAIL]` aus. Zu beachten: Diese Version enthält 
 
 ---
 
-### `testStapel_KI_Generiert.cpp`
+### `testStapel_v2.cpp`
 
-**KI-generiertes** Testprogramm für `Stapel.h` (Version 2, überarbeitete Fassung). Ebenfalls eine Template-Hilfsfunktion (`run_stapel_test<T>`), diesmal mit korrekter direkter Integer-Initialisierung (kein `reinterpret_cast`). Der Testablauf ist noch vollständiger als in Version 1:
+Testprogramm für `Stapel.h` (Version 2, überarbeitete Fassung). Ebenfalls eine Template-Hilfsfunktion (`run_stapel_test<T>`), diesmal mit korrekter direkter Integer-Initialisierung (kein `reinterpret_cast`). Der Testablauf ist noch vollständiger als in Version 1:
 
 1. Anfangszustand prüfen (leer).
 2. Drei Elemente pushen (statt zwei).
@@ -166,19 +164,22 @@ Da alle Datenstrukturen als Header-Only-Bibliotheken vorliegen, genügt es, die 
 
 ```bash
 # Stapel testen (Version 2)
-g++ -std=c++17 -o testStapel testStapel_KI_Generiert.cpp && ./testStapel
+g++ -std=c++17 -o testStapel testStapel_v2.cpp && ./testStapel
+
+# Stapel testen (Version 1)
+g++ -std=c++17 -o testStapel testStapel_v1.cpp && ./testStapel
 
 # Verkettete Liste testen
 g++ -std=c++17 -o testListe testVerketteteListe.cpp && ./testListe
 ```
 
-Es wird mindestens **C++17** benötigt (wegen `if constexpr` in den KI-generierten Tests).
+Es wird mindestens **C++17** benötigt.
 
 ---
 
 ## Konventionen
 
-- **Dateinamen:** KI-generierte Dateien tragen `_KI_generiert` oder `_KI_Generiert` im Namen.
-- **Sprache:** Methoden- und Variablennamen folgen der unseren Schulkonvention zur Namensgebungs (z.B. `gibInhalt`, `setzeNaechsten`, `istLeer`).
+- **Sprache:** Methoden- und Variablennamen folgen der unseren Schulkonvention zur Namensgebung (z.B. `gibInhalt`, `setzeNaechsten`, `istLeer`).
 - **Speicherverwaltung:** Bevorzugt werden `std::shared_ptr` und Move-Semantik; Kopier-Konstruktoren werden wo sinnvoll deaktiviert.
 - **Fehlerbehandlung:** Ungültige Operationen werfen C++-Standardausnahmen (`std::out_of_range`, `std::invalid_argument`, `std::logic_error`).
+- **KI-Einfluss:** Ein großer Teil des Codes und der Tests wurde mit KI-Unterstützung erstellt und anschließend manuell geprüft und korrigiert.

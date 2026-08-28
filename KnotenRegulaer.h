@@ -26,9 +26,6 @@ class Knoten{
     void setzeNaechsten(std::shared_ptr<Knoten<Typ>> pNaechster){
         aNaechster = pNaechster;
     };
-    std::shared_ptr<Knoten<Typ>> gibNaechsten(){
-        return aNaechster;
-    };
 
     void setzeInhalt(Typ pInhalt){
         aInhalt = std::move(pInhalt);
@@ -36,10 +33,13 @@ class Knoten{
     Typ gibInhalt() const{
         return aInhalt;
     };
-
-    std::shared_ptr<Knoten<Typ>> aNaechster; // Folge-Knoten
     private:
+    std::shared_ptr<Knoten<Typ>> aNaechster; // Folge-Knoten
     Typ aInhalt; //Daten, die in der Datenstruktur organisiert werden
 
+    public:
+    std::shared_ptr<Knoten<Typ>> gibNaechsten(){
+        return aNaechster;
+    };
 
 };

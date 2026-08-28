@@ -59,12 +59,12 @@ class verketteteListe{
     int anzahlElemente(){
         if(istLeer()) return 0;
     
-        int anzahl = 1;  // Start bei 1 (weil wir aAnfang nicht zählen)
+        int anzahl = 0;
         std::shared_ptr<Knoten<Typ>> aktuellerZeiger = aAnfang;
     
-        while(aktuellerZeiger->gibNaechsten() != nullptr){
-            aktuellerZeiger = aktuellerZeiger->gibNaechsten();
+        while(aktuellerZeiger != nullptr){
             anzahl++;
+            aktuellerZeiger = aktuellerZeiger->gibNaechsten();
         }
         return anzahl;
     }
@@ -96,11 +96,12 @@ class verketteteListe{
     };
 
     void einfuegen(int pIndex, Typ pInhalt){
-        std::shared_ptr zeigerZuNeuemKnoten = std::make_shared<Knoten<Typ>>(pInhalt); 
+        std::shared_ptr<Knoten<Typ>> zeigerZuNeuemKnoten = std::make_shared<Knoten<Typ>>(pInhalt); 
 
         if(pIndex < 0){
             throw std::invalid_argument("Fehler: Der Index muss 0 oder hoeher sein!");
         }else if(pIndex == 0){
+            zeigerZuNeuemKnoten->setzeNaechsten(aAnfang);
             aAnfang = zeigerZuNeuemKnoten;
             return;
         }
@@ -111,16 +112,9 @@ class verketteteListe{
        
 
         std::shared_ptr<Knoten<Typ>> voherigerKnoten = knotenWaehler(pIndex-1);
-        voherigerKnoten->setzeNaechsten(std::move(zeigerZuNeuemKnoten));
-
-
-        if(pIndex < anzahlElemente()){
-            std::shared_ptr<Knoten<Typ>> nachfolgenderKnoten = knotenWaehler(pIndex);
-            zeigerZuNeuemKnoten->setzeNaechsten(nachfolgenderKnoten);
-        }else if(pIndex == anzahlElemente()){
-            voherigerKnoten->setzeNaechsten(zeigerZuNeuemKnoten);
-        }
-        
+        std::shared_ptr<Knoten<Typ>> nachfolgerKnoten = voherigerKnoten->gibNaechsten();
+        zeigerZuNeuemKnoten->setzeNaechsten(nachfolgerKnoten);
+        voherigerKnoten->setzeNaechsten(zeigerZuNeuemKnoten);
     };
 
     void einfuegenVorne(Typ pInhalt){
@@ -140,14 +134,15 @@ class verketteteListe{
         if(pIndex == 0) { 
             Typ tmpInhalt = aAnfang->gibInhalt();
             auto nachfolgerKnoten = aAnfang->gibNaechsten();
-            aAnfang = std::move(nachfolgerKnoten);
+            aAnfang = nachfolgerKnoten;
             return tmpInhalt;
         }
 
         // Edge Case: Letztes Element
         if(pIndex + 1 >= anzahlElemente()){
             auto voherigerKnoten = knotenWaehler(pIndex-1);
-            Typ tmpInhalt = voherigerKnoten->gibNaechsten();
+            auto zuEntfernen = voherigerKnoten->gibNaechsten();
+            Typ tmpInhalt = zuEntfernen->gibInhalt();
             voherigerKnoten->setzeNaechsten(nullptr);
             return tmpInhalt;
         }
@@ -155,15 +150,10 @@ class verketteteListe{
         // Normaler Fall: Mittleres Element
         auto voherigerKnoten = knotenWaehler(pIndex-1);
         auto rueckgabeKnoten = voherigerKnoten->gibNaechsten();
+        auto folgeKnoten = rueckgabeKnoten->gibNaechsten();
+        voherigerKnoten->setzeNaechsten(folgeKnoten);
     
-        if(rueckgabeKnoten->gibNaechsten() != nullptr){
-            Typ folgeInhalt = voherigerKnoten->gibNaechsten();
-            voherigerKnoten->setzeNaechsten(folgeInhalt);
-        }else{
-            voherigerKnoten->setzeNaechsten(nullptr);
-        }
-
-        return rueckgabeKnoten->gibInhalt();  // Inhalt zurückgeben
+        return rueckgabeKnoten->gibInhalt();
     }
 
     Typ entfernenVorne(){
@@ -207,9 +197,11 @@ class verketteteListe{
                 } else {
                     aAnfang = naechsterKnoten;  // Edge Case: Erstes Element
                 }
+                aktuellerZeiger = naechsterKnoten;
+            } else {
+                voherigerZeiger = aktuellerZeiger;
+                aktuellerZeiger = aktuellerZeiger->gibNaechsten(); 
             }
-            voherigerZeiger = aktuellerZeiger;
-            aktuellerZeiger = aktuellerZeiger->gibNaechsten(); 
         }
     }
     
